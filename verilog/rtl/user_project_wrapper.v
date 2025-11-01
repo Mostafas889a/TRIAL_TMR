@@ -82,41 +82,71 @@ module user_project_wrapper #(
 /* User project is instantiated  here   */
 /*--------------------------------------*/
 
-user_proj_example mprj (
+wire tmr0_pwm0;
+wire tmr0_pwm1;
+wire tmr0_fault;
+wire tmr1_pwm0;
+wire tmr1_pwm1;
+wire tmr1_fault;
+
+user_project mprj (
 `ifdef USE_POWER_PINS
-	.vccd1(vccd1),	// User area 1 1.8V power
-	.vssd1(vssd1),	// User area 1 digital ground
+	.vccd1(vccd1),
+	.vssd1(vssd1),
 `endif
 
     .wb_clk_i(wb_clk_i),
     .wb_rst_i(wb_rst_i),
 
-    // MGMT SoC Wishbone Slave
-
-    .wbs_cyc_i(wbs_cyc_i),
     .wbs_stb_i(wbs_stb_i),
+    .wbs_cyc_i(wbs_cyc_i),
     .wbs_we_i(wbs_we_i),
     .wbs_sel_i(wbs_sel_i),
-    .wbs_adr_i(wbs_adr_i),
     .wbs_dat_i(wbs_dat_i),
+    .wbs_adr_i(wbs_adr_i),
     .wbs_ack_o(wbs_ack_o),
     .wbs_dat_o(wbs_dat_o),
 
-    // Logic Analyzer
-
     .la_data_in(la_data_in),
     .la_data_out(la_data_out),
-    .la_oenb (la_oenb),
+    .la_oenb(la_oenb),
 
-    // IO Pads
+    .user_irq(user_irq),
 
-    .io_in ({io_in[37:30],io_in[7:0]}),
-    .io_out({io_out[37:30],io_out[7:0]}),
-    .io_oeb({io_oeb[37:30],io_oeb[7:0]}),
+    .tmr0_pwm0(tmr0_pwm0),
+    .tmr0_pwm1(tmr0_pwm1),
+    .tmr0_fault(tmr0_fault),
 
-    // IRQ
-    .irq(user_irq)
+    .tmr1_pwm0(tmr1_pwm0),
+    .tmr1_pwm1(tmr1_pwm1),
+    .tmr1_fault(tmr1_fault)
 );
+
+assign io_out[5] = tmr0_pwm0;
+assign io_oeb[5] = 1'b0;
+
+assign io_out[6] = tmr0_pwm1;
+assign io_oeb[6] = 1'b0;
+
+assign tmr0_fault = io_in[7];
+assign io_out[7] = 1'b0;
+assign io_oeb[7] = 1'b1;
+
+assign io_out[8] = tmr1_pwm0;
+assign io_oeb[8] = 1'b0;
+
+assign io_out[9] = tmr1_pwm1;
+assign io_oeb[9] = 1'b0;
+
+assign tmr1_fault = io_in[10];
+assign io_out[10] = 1'b0;
+assign io_oeb[10] = 1'b1;
+
+assign io_out[37:11] = 27'b0;
+assign io_oeb[37:11] = {27{1'b1}};
+
+assign io_out[4:0] = 5'b0;
+assign io_oeb[4:0] = {5{1'b1}};
 
 endmodule	// user_project_wrapper
 
